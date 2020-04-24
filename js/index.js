@@ -31,8 +31,8 @@ document.addEventListener("resume", recReady, false);
 // DOMContentLoaded事件处理
 var _domReady=false;
 
-//var urlApi = 'http://fin-notice.xingyun361.com'
-var urlApi = 'http://172.16.120.235:8008'
+var urlApi = 'http://fin-notice.xingyun361.com'
+//var urlApi = 'http://172.16.120.235:8008'
 
 document.addEventListener('DOMContentLoaded',function(){
 	plus.device.setWakelock(true)
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded',function(){
 	var time = new Date().getTime()
 	document.getElementById('content').setAttribute('data-time', time)
 	ready();
-//	smsReady();
-	setInterval(recReady, 100);
+	smsReady();
+//	setInterval(recReady, 60000);
 //	setInterval(() => {
 //		Ajax.post(urlApi+'/testpost', JSON.stringify({username: '保持通讯'}), function(res){
 //			var resData = JSON.parse(res)
@@ -127,7 +127,8 @@ function ready(time){
 			SmsInfo.Smsbody = cusor.getString(smsbodyColumn);
 			if (regContent(SmsInfo.Smsbody)) {
 				var SmsInfoTime = new Date(SmsInfo.Date).getTime();
-				if (SmsInfoTime >= time) {
+//				document.getElementById('content').setAttribute('data-time', SmsInfoTime);
+				if (SmsInfoTime > time) {
 					var content = SmsInfo.Smsbody;
 					Ajax.post(urlApi + '/qq/sendmsg', JSON.stringify({msginfo: content}), function(res){						
 						var resData = JSON.parse(res);
@@ -140,7 +141,7 @@ function ready(time){
 			cusor.moveToNext();
 		}
 		document.getElementById('plist').innerHTML = html;
-		cusor.close() //关闭
+//		cusor.close() //关闭
 	} else {
 		console.log('---------------------error')
 		console.log('cusor:' + cusor)
@@ -150,9 +151,16 @@ function ready(time){
 
 
 function regContent (content) {
-	var reg_jn = content.indexOf('江南银行')!=-1 && content.indexOf('转入')!=-1 && (content.indexOf('*1660') != -1 || content.indexOf('*1679') != -1);
+	var reg_jn = 
+		content.indexOf('江南银行')!=-1 && 
+		content.indexOf('转入')!=-1 && 
+		(content.indexOf('*1660') != -1 || content.indexOf('*1679') != -1) && 
+		content.indexOf('江苏智恒达型云网络科技有限公司') === -1 && 
+		content.indexOf('常州同城江苏岳洋通金属加工有限公司') === -1 &&
+		content.indexOf('常州同城江苏智恒达机械科技有限公司') === -1 &&
+		content.indexOf('江苏智恒达机械科技有限公司') === -1;
 	var reg_hx = content.indexOf('华夏银行')!=-1 && content.indexOf('收入')!=-1 && (content.indexOf('账户0863') != -1 || content.indexOf('账户1963') != -1);
-	var reg_nh = content.indexOf('中国农业银行')!=-1 && content.indexOf('人民币-') == -1 && content.indexOf('理财赎回') == -1 && content.indexOf('现存交易') == -1 && content.indexOf('尾号9874') != -1;
+	var reg_nh = content.indexOf('中国农业银行')!=-1 && content.indexOf('人民币-') == -1 && content.indexOf('理财赎回') == -1 && content.indexOf('现存交易') == -1 && content.indexOf('尾号0173') != -1;
 	if (reg_jn || reg_hx || reg_nh) {
 		return true
 	} else {
